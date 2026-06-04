@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { setAdminToken } from '../api/axios';
 
 const AuthContext = createContext(null);
@@ -11,6 +11,38 @@ export function AuthProvider({ children }) {
       return stored;
     } catch { return null; }
   });
+
+  const [loading, setLoading] = useState(() => {
+    try { return !!JSON.parse(localStorage.getItem('user')); }
+    catch { return false; }
+  });
+
+  useEffect(() => {
+    const stored = (() => {
+      try { return JSON.parse(localStorage.getItem('user')); }
+      catch { return null; }
+    })();
+
+    if (!stored) { setLoading(false); return; }
+
+    fetch(
+      `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/auth/refresh`,
+      { method: 'POST', credentials: 'include' }
+    )
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(({ token }) => {
+        setAdminToken(token);
+        setLoading(false);
+      })
+      .catch(() => {
+        localStorage.removeItem('user');
+        setUser(null);
+        setLoading(false);
+      });
+  }, []);
 
   const login = (userData, token) => {
     const u = { ...userData, role: 'admin' };
@@ -29,6 +61,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user');
     setUser(null);
   };
+
+  if (loading) return null;
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

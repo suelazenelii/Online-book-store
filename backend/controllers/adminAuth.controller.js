@@ -37,6 +37,12 @@ exports.register = async (req, res) => {
       [emri.trim(), mbiemri.trim(), emailNorm, hash]
     );
 
+    await db.query(
+      `INSERT INTO UserRoles (klient_id, admin_id, rol_id)
+       SELECT NULL, ?, rol_id FROM Roles WHERE emri = 'admin' LIMIT 1`,
+      [result.insertId]
+    );
+
     const token = authService.signToken({
       id:      result.insertId,
       email:   emailNorm,
@@ -87,12 +93,20 @@ exports.login = async (req, res) => {
     if (!admin || !(await authService.comparePassword(password, admin.fjalekalimi_hash)))
       return res.status(401).json({ error: 'Incorrect email or password.' });
 
+    const [roleRows] = await db.query(
+      `SELECT r.emri FROM UserRoles ur
+       JOIN Roles r ON r.rol_id = ur.rol_id
+       WHERE ur.admin_id = ? LIMIT 1`,
+      [admin.admin_id]
+    );
+    const role = roleRows[0]?.emri || 'admin';
+
     const token = authService.signToken({
       id:      admin.admin_id,
       email:   admin.email,
       emri:    admin.emri,
       mbiemri: admin.mbiemri,
-      role:    'admin',
+      role,
     });
 
     const refreshToken  = authService.generateRefreshToken();
@@ -110,7 +124,7 @@ exports.login = async (req, res) => {
         emri:    admin.emri,
         mbiemri: admin.mbiemri,
         email:   admin.email,
-        role:    'admin',
+        role,
       },
     });
 

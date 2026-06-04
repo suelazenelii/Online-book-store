@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { setUserToken } from '../api/userAxios';
 
 const UserAuthContext = createContext(null);
@@ -11,6 +11,38 @@ export function UserAuthProvider({ children }) {
       return stored;
     } catch { return null; }
   });
+
+  const [loading, setLoading] = useState(() => {
+    try { return !!JSON.parse(localStorage.getItem('user_data')); }
+    catch { return false; }
+  });
+
+  useEffect(() => {
+    const stored = (() => {
+      try { return JSON.parse(localStorage.getItem('user_data')); }
+      catch { return null; }
+    })();
+
+    if (!stored) { setLoading(false); return; }
+
+    fetch(
+      `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/refresh`,
+      { method: 'POST', credentials: 'include' }
+    )
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(({ token }) => {
+        setUserToken(token);
+        setLoading(false);
+      })
+      .catch(() => {
+        localStorage.removeItem('user_data');
+        setUser(null);
+        setLoading(false);
+      });
+  }, []);
 
   const login = (userData, token) => {
     const u = { ...userData, role: 'user' };
@@ -35,6 +67,8 @@ export function UserAuthProvider({ children }) {
     localStorage.setItem('user_data', JSON.stringify(merged));
     setUser(merged);
   };
+
+  if (loading) return null;
 
   return (
     <UserAuthContext.Provider value={{ user, login, logout, updateUser }}>

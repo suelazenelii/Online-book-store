@@ -6,7 +6,7 @@ exports.getAll = () =>
   db.query(`
     SELECT s.*, CONCAT(a.emri,' ',a.mbiemri) AS autor_emri
     FROM Seria s
-    LEFT JOIN Autoret a ON s.autor_id = a.autor_id
+    LEFT JOIN Autoret a ON s.autor_id = a.autori_id
     ORDER BY s.seria_id DESC`).then(([rows]) => rows);
 
 exports.getById = (id) =>

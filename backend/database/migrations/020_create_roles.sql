@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS Roles (
+  rol_id    INT          AUTO_INCREMENT PRIMARY KEY,
+  emri      VARCHAR(50)  NOT NULL UNIQUE,
+  pershkrim VARCHAR(255) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

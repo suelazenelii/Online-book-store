@@ -40,6 +40,12 @@ exports.register = async (req, res) => {
        telefoni || null, adresa || null, qyteti || null, kodi_postar || null]
     );
 
+    await db.query(
+      `INSERT INTO UserRoles (klient_id, admin_id, rol_id)
+       SELECT ?, NULL, rol_id FROM Roles WHERE emri = 'user' LIMIT 1`,
+      [result.insertId]
+    );
+
     const token = authService.signToken({
       id: result.insertId, email: emailNorm,
       emri: emri.trim(), mbiemri: mbiemri.trim(), role: 'user',
@@ -81,9 +87,17 @@ exports.login = async (req, res) => {
     if (!user || !(await authService.comparePassword(password, user.fjalekalimi_hash)))
       return res.status(401).json({ error: 'Incorrect email or password.' });
 
+    const [roleRows] = await db.query(
+      `SELECT r.emri FROM UserRoles ur
+       JOIN Roles r ON r.rol_id = ur.rol_id
+       WHERE ur.klient_id = ? LIMIT 1`,
+      [user.klient_id]
+    );
+    const role = roleRows[0]?.emri || 'user';
+
     const token = authService.signToken({
       id: user.klient_id, email: user.email,
-      emri: user.emri, mbiemri: user.mbiemri, role: 'user',
+      emri: user.emri, mbiemri: user.mbiemri, role,
     });
 
     const refreshToken  = authService.generateRefreshToken();
@@ -96,7 +110,7 @@ exports.login = async (req, res) => {
     res.cookie(COOKIE_NAME, refreshToken, cookieOpts());
     return res.json({
       token,
-      user: { id: user.klient_id, emri: user.emri, mbiemri: user.mbiemri, email: user.email, role: 'user' },
+      user: { id: user.klient_id, emri: user.emri, mbiemri: user.mbiemri, email: user.email, role },
     });
 
   } catch (err) {
