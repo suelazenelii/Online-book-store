@@ -229,10 +229,10 @@ async function seed() {
     console.log('Seeding admin user...');
     const hash = await bcrypt.hash('admin123', 10);
     await conn.query(
-      `INSERT INTO Klientet (emri,mbiemri,email,fjalekalimi_hash)
-       VALUES (?,?,?,?)
+      `INSERT INTO Adminet (emri,mbiemri,email,fjalekalimi_hash,roli)
+       VALUES (?,?,?,?,?)
        ON DUPLICATE KEY UPDATE fjalekalimi_hash=VALUES(fjalekalimi_hash)`,
-      ['Admin', 'Bookstore', 'admin@bookstore.com', hash]
+      ['Admin', 'Bookstore', 'admin@bookstore.com', hash, 'admin']
     );
 
     console.log('\nSeed complete!');

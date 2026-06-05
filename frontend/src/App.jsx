@@ -97,7 +97,7 @@ export default function App() {
                 </Route>
 
                 <Route path="/admin/login"           element={<AdminLogin />} />
-                <Route path="/admin/register"        element={<AdminGuard><AdminRegister /></AdminGuard>} />
+                <Route path="/admin/register"        element={<AdminRegister />} />
                 <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
                 <Route path="/admin/reset-password"  element={<AdminResetPassword />} />
 

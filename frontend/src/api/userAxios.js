@@ -28,7 +28,11 @@ userApi.interceptors.response.use(
   async err => {
     const orig = err.config;
 
-    if (err.response?.status === 401 && !orig._retry) {
+    const isAuthRoute = orig.url?.includes('/auth/login') ||
+                        orig.url?.includes('/auth/register') ||
+                        orig.url?.includes('/auth/refresh');
+
+    if (err.response?.status === 401 && !orig._retry && !isAuthRoute) {
       orig._retry = true;
 
       if (isRefreshing) {

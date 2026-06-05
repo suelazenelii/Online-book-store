@@ -29,7 +29,7 @@ const forgotLimiter = rateLimit({
   message:         { error: 'Too many password reset requests. Please try again in 1 hour.' },
 });
 
-router.post('/register',        adminAuth,     ctrl.register);
+router.post('/register',                       ctrl.register);
 router.post('/login',           loginLimiter,  ctrl.login);
 router.get ('/me',              adminAuth,     ctrl.me);
 router.put ('/change-password', adminAuth,     ctrl.changePassword);

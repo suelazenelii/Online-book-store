@@ -4,7 +4,7 @@ import NexusLogo from './NexusLogo';
 import {
   LayoutDashboard, BookOpen, PenLine, Tag, Building2, Globe, BookMarked,
   Users, MapPin, Bell, ShoppingCart, Ticket, Zap, CreditCard,
-  Truck, Package, RotateCcw, FileText, Star, LogOut,
+  Truck, Package, RotateCcw, FileText, Star, LogOut, KeyRound,
 } from 'lucide-react';
 
 const sections = [
@@ -57,13 +57,19 @@ const sections = [
       { to: '/admin/vleresimet', label: 'Vlerësimet', icon: Star },
     ],
   },
+  {
+    label: 'Llogaria',
+    items: [
+      { to: '/admin/change-password', label: 'Ndrysho Fjalëk.', icon: KeyRound },
+    ],
+  },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => { logout(); navigate('/admin/login'); };
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">

@@ -43,24 +43,7 @@ exports.register = async (req, res) => {
       [result.insertId]
     );
 
-    const token = authService.signToken({
-      id:      result.insertId,
-      email:   emailNorm,
-      emri:    emri.trim(),
-      mbiemri: mbiemri.trim(),
-      role:    'admin',
-    });
-
-    const refreshToken  = authService.generateRefreshToken();
-    const refreshExpiry = new Date(Date.now() + authService.REFRESH_TOKEN_TTL_MS);
-    await db.query(
-      'UPDATE Adminet SET refresh_token = ?, refresh_token_expiry = ? WHERE admin_id = ?',
-      [authService.hashRefreshToken(refreshToken), refreshExpiry, result.insertId]
-    );
-
-    res.cookie(COOKIE_NAME, refreshToken, cookieOpts());
     return res.status(201).json({
-      token,
       user: {
         id:      result.insertId,
         emri:    emri.trim(),
